@@ -1,0 +1,101 @@
+# ===============================
+# 🔧 Laravel + Docker (Windows)
+# ===============================
+
+# Sistema
+.DS_Store
+Thumbs.db
+ehthumbs.db
+Icon?
+desktop.ini
+
+# Diretórios e arquivos temporários
+*.log
+*.cache
+*.tmp
+*.bak
+*.swp
+
+# ===============================
+# 🐘 Laravel
+# ===============================
+/vendor/
+/node_modules/
+/bootstrap/cache/
+/storage/*.key
+/storage/app/public
+/storage/framework/cache/*
+/storage/framework/sessions/*
+/storage/framework/views/*
+/storage/logs/*
+
+.env
+.env.*
+.env.local
+.env.backup
+.env.example.local
+
+# ===============================
+# 🐋 Docker
+# ===============================
+/docker/*.pid
+/docker/*.log
+/docker/*.tmp
+/docker/data/*
+/docker/mysql/*
+/docker/redis/*
+/docker/volumes/*
+/.docker/
+docker-compose.override.yml
+docker-compose.local.yml
+
+# ===============================
+# ⚙️ IDEs e Ferramentas
+# ===============================
+# VS Code
+.vscode/
+.history/
+*.code-workspace
+
+# PHPStorm / JetBrains
+.idea/
+*.iml
+
+# Composer
+composer.lock
+composer.phar
+
+# Node / NPM / Yarn
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+npm-debug.log
+yarn-debug.log*
+yarn-error.log*
+
+# ===============================
+# 📦 Laravel Build / Front-end
+# ===============================
+/public/hot
+/public/storage
+/public/build
+/public/mix-manifest.json
+
+# ===============================
+# 🧪 Testes
+# ===============================
+/coverage/
+.phpunit.result.cache
+
+# ===============================
+# 🚀 Outros
+# ===============================
+# Arquivos de backup locais
+*.orig
+*.bak
+*.tmp
+*.old
+
+# Logs do sistema do Docker
+logs/
+tmp/
