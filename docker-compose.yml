@@ -1,0 +1,76 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    working_dir: /var/www/
+    volumes:
+      - ./:/var/www
+    depends_on:
+      - db  # Garante a inicialização do banco antes da aplicação
+      - redis
+    networks:
+      - laravel
+    ports:
+      - "9000:9000"  # Mapeia a porta 9000 para o PHP-FPM
+      - "9003:9003"  # Xdebug
+      - "8000:8000"  # Mapeia a porta 8000 do Laravel para o host
+
+
+  nginx:
+    image: nginx:alpine
+    restart: unless-stopped
+    ports:
+      - "8989:85"  # Mapeia a porta 85 interna para 8989 externa
+    volumes:
+      - ./:/var/www
+      - ./docker/nginx/:/etc/nginx/conf.d/
+    networks:
+      - laravel
+    depends_on:
+      - app
+
+  db:
+    image: mysql:8.0
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: ${DB_DATABASE:-pescala}
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD:-galo@1971}
+      MYSQL_PASSWORD: ${DB_PASSWORD:-galo@1971}
+      MYSQL_USER: ${DB_USERNAME:-pescala}
+      MYSQL_INITDB_SKIP_TZINFO: 1
+      MYSQL_MODE: "NO_ENGINE_SUBSTITUTION"
+    volumes:
+      - ./docker/mysql/data:/var/lib/mysql
+    ports:
+      - "3305:3306"  # Porta externa 3306 para a interna do MySQL
+    networks:
+      - laravel
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    restart: unless-stopped
+    ports:
+      - "8085:80"  # Mapeia a porta 80 interna para 8085 externa
+    environment:
+      PMA_HOST: db
+      PMA_PORT: 3306  # Porta do MySQL
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD:-galo@1971}
+    networks:
+      - laravel
+    depends_on:
+      - db
+
+  redis:
+    image: redis:latest
+    restart: unless-stopped
+    networks:
+      - laravel
+
+networks:
+  laravel:
+    driver: bridge  
+
+volumes:
+  mysql_data:

@@ -1,0 +1,158 @@
+#####################################################
+##########  configuração inicial do projeto #########
+#####################################################
+
+#alterar as permissões
+#na maquina local acesse o diretório onde está o projeto através do explorer e altere as permissões
+#definindo todos os grupos de usarios, permissão total, para facilitar.
+
+#rodar o docker-compose inicialmente
+#uma vez dentro do diretorio docker-laravel-base no vscode ou ide de sua preferencia rode no terminal
+docker-compose up -d --build
+#isso subirá o projeto para o docker
+
+
+#lista os containers
+docker container ls
+
+#acessa o containair
+#docker exec -it "nome-container" bash
+#normalmente 
+docker exec -it docker-laravel-base-app-1 bash
+#é necessário entender que a partir de agora vc está acessando o container docker e não a sua máquina
+
+#verifica se o compose está instalado no docker
+composer --version
+#caso nao esteja instalado instale-o
+apt update
+apt install curl zip unzip -y
+curl -sS https://getcomposer.org/installer | php
+mv composer.phar /usr/local/bin/composer
+
+#altere o timeout do composer para garantir que não pare
+composer config -g process-timeout 2000
+
+
+#crie o novo projeto laravel, nesse caso com o nome laravel
+composer create-project --prefer-dist laravel/laravel docker-laravel-base
+
+#após cria o novo projeto é necessário alterar o nginx para o novo diretório,
+#lembrando que o nginx é o servidor onde roda o php e o laravel
+
+#nessa arquitetura o diretório é:
+#diretorio -> docker/nginx
+#acesse o arquivo-> default.config, altere o diretório de apontamento, nesse caso já está configurado mas, 
+# confira se está de acordo o projeto criado, isso pode ser alterado dependo da maneira que foi configurado
+#linha 4
+root /var/www/docker-laravel-base/public;
+
+
+
+
+#ajuste as permissoes para garantir que está tudo ok
+#acesse o container
+docker exec -u root -it docker-laravel-base-app-1 bash
+#ajusta as permissões
+chown -R www-data:www-data /var/www/docker-laravel-base
+chmod -R 775 /var/www/docker-laravel-base/storage /var/www/docker-laravel-base/bootstrap/cache
+#reestarta o docker-compose
+
+
+
+## instala dependencias necessarias para autenticação paginação e depuracao
+
+composer require laravel/sanctum
+composer require spatie/laravel-query-builder
+composer require fruitcake/laravel-cors
+composer require laravel/tinker --dev
+
+laravel/sanctum → Autenticação via tokens (ideal para apps mobile e SPAs desacopladas).
+
+spatie/laravel-query-builder → Facilita filtros, ordenação, includes e paginação automáticas na API.
+
+fruitcake/laravel-cors → Habilita CORS (necessário para comunicação com front-end e mobile).
+
+laravel/tinker → Ferramenta de depuração em desenvolvimento.
+
+
+
+#####################################################
+##########  execução do laravel no container ########
+#####################################################
+
+#configurando o arquivo env
+#ajusta a url com a url do servidor nesse caso o nginx
+#porta utilizada no arquivo docker-compose
+APP_URL=http://localhost:8989
+
+#ajusta as configurações de conexão com o mysql 
+#com as configurações utilizadas no  docker-compose  
+DB_CONNECTION=mysql
+DB_HOST=db  # Nome do serviço MySQL definido no docker-compose.yml
+DB_PORT=3306  # A porta interna do contêiner MySQL
+DB_DATABASE=laravel
+DB_USERNAME=laravel
+DB_PASSWORD=passowrd 
+
+
+#gerar a chave laravel
+#acesse o container
+docker exec -u root -it laravel_docker-laravel-base-app-1 bash
+ou
+docker exec -it --user=root laravel_docker-laravel-base-app-1 bash
+
+#navegue para o diretório laravel 
+cd laravel
+#rode o artisan key para gerar o key do laravel
+php artisan key
+
+
+#agora gerar as tabelas do laravel dentro do container
+php artisan migrate
+
+
+#limpe o arquivo do db para garantir, remova o arquivo em
+Remove-Item -Recurse -Force .\dbdata
+
+#em casos de erros limpe do cache do laravel
+php artisan cache:clear
+php artisan config:cache
+php artisan route:cache
+php artisan view:clear
+
+
+#rodar a aplicação, fora do contianer e dentro do diretório laravel 
+cd laravel 
+######  
+######  início aplicações acopladas para api não é necessário
+######  
+#instale o vite  
+npm install --save-dev vite
+
+#gere o arquivo manifest, dando o build
+ npm run build
+
+#roda a aplicação 
+npm run dev
+
+#startar o servidor da aplicação
+php artisan serve
+
+#####  
+######  fim aplicações acopladas
+######  
+
+#criando a autenticação, utiliza o breeze do laravel
+#acessa o container "docker compose exec app bash"
+#utiliza o composer do container para instlar
+composer require laravel/breeze --dev
+
+#atualiza instala o breeze
+php artisan breeze:install
+
+
+
+
+
+
+
