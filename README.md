@@ -31,7 +31,7 @@ Instale o Docker Desktop (para Windows 10 ou superior).
 
 Clone o repositório:
 
-git clone https://github.com/seu-usuario/nome-do-repo.git
+git clone [https://github.com/seu-usuario/nome-do-repo.git](https://github.com/murilodark/docker-laravel.git)
 cd nome-do-repo
 
 
